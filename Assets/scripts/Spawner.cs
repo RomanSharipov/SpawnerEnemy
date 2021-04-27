@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Transform))]
 public class Spawner : MonoBehaviour
 {
     [SerializeField] private GameObject _enemy;
     [SerializeField] private float _secondsBetweenSpawn;
 
     private Transform[] _points;
+    private Transform _spawn;
 
     private void OnValidate()
     {
@@ -19,7 +21,14 @@ public class Spawner : MonoBehaviour
 
     private void Start()
     {
-        _points = GetComponentsInChildren<Transform>();
+        _spawn = GetComponent<Transform>();
+        _points = new Transform[_spawn.childCount];
+
+        for (int i = 0; i < _points.Length; i++)
+        {
+            _points[i] = _spawn.GetChild(i);
+        }
+
         var spawnEnemyJob = StartCoroutine(SpawnEnemy());
     }
 
@@ -27,7 +36,7 @@ public class Spawner : MonoBehaviour
     {
         var waitForSeconds = new WaitForSeconds(_secondsBetweenSpawn);
 
-        for (int i = 1; i < _points.Length; i++)
+        for (int i = 0; i < _points.Length; i++)
         {
             Instantiate(_enemy, _points[i].position, Quaternion.identity);
             yield return waitForSeconds;
